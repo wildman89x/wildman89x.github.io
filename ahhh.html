@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Weather Tracker</title>
+    <link rel="icon" href="/assets/weather.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@4.5.2/dist/cerulean/bootstrap.min.css" integrity="sha384-3fdgwJw17Bi87e1QQ4fsLn4rUFqWw//KU0g8TvV6quvahISRewev6/EocKNuJmEw" crossorigin="anonymous">
+    <!-- <style>
+        body { background-color: #f8f9fa; padding: 30px; text-align: center; }
+        .weather-box { max-width: 400px; margin: auto; border-radius: 12px; padding: 20px; background: white; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); }
+        .weather-icon { font-size: 50px; color: #007bff; }
+    </style> -->
+</head>
+<body>
+  <div class="d-flex flex-column align-items-center justify-content-center">
+    <h2>Live Weather Tracker</h2>
+    <div class="d-flex align-items-center justify-content-center  bg-dark text-light col-12 col-md-8 col-lg-5" >
+        <h5 id="city">Location: Loading...</h5>
+        <div class="d-flex align-items-center justify-content-center">
+            <i id="icon" class="bi bi-cloud-fill weather-icon"></i>
+            <div class="ms-3">
+                <h1 id="temp">--°F</h1>
+                <p id="humid">Humidity: --%</p>
+            </div>
+        </div>
+    </div>
+  <div>
+    <p class="mt-4">Data provided by <a href="https://open-meteo.com" target="_blank">Open-Meteo</a></p>
+    
+    <script>
+        const WEATHER_API = 'https://api.open-meteo.com/v1/forecast?latitude=36.1682&longitude=-85.5016&current=temperature_2m,relative_humidity_2m&temperature_unit=fahrenheit&timezone=America%2FChicago';
+
+        async function fetchLocation(lat, lon) {
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+                const data = await res.json();
+                return data.address.city || data.address.town || data.address.village || "Unknown";
+            } catch {
+                return "Unknown";
+            }
+        }
+
+        async function fetchWeather() {
+            try {
+                const res = await fetch(WEATHER_API);
+                const weather = await res.json();
+                
+                document.getElementById('temp').textContent = `${weather.current.temperature_2m}°F`;
+                document.getElementById('humid').textContent = `Humidity: ${weather.current.relative_humidity_2m}%`;
+                
+                const city = await fetchLocation(weather.latitude, weather.longitude);
+                document.getElementById('city').textContent = `Location: ${city}`;
+                
+                document.getElementById('icon').className = weather.current.temperature_2m > 75 ? 'bi bi-brightness-high-fill weather-icon' : 'bi bi-cloudy-fill weather-icon';
+            } catch (err) {
+                console.error('Weather fetch error:', err);
+            }
+        }
+        
+        fetchWeather();
+    </script>
+</body>
+</html>
